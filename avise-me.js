@@ -1,10 +1,10 @@
 function iniciarAviseMe() {
-    // Localiza especificamente o input de esgotado do tema Rio
-    const outOfStockInput = document.querySelector('input.js-prod-submit-form[disabled], input.nostock[disabled]');
+    // Procura por input ou button de esgotado/desabilitado na página
+    const outOfStockInput = document.querySelector('input.js-prod-submit-form[disabled], button.js-prod-submit-form[disabled], input.nostock[disabled], button.nostock[disabled], .js-prod-submit-form[disabled]');
 
     if (outOfStockInput && !document.querySelector('#custom-avise-me')) {
         // Encontra a coluna pai para substituir ou inserir abaixo
-        const colContainer = outOfStockInput.closest('.col-12');
+        const colContainer = outOfStockInput.closest('.col-12') || outOfStockInput.parentElement;
 
         if (colContainer) {
             // Oculta o botão cinza original de "ESGOTADO"
@@ -41,7 +41,7 @@ function iniciarAviseMe() {
     }
 }
 
-// Executa assim que o script carregar (independente do DOMContentLoaded)
+// Executa assim que o script carregar
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', iniciarAviseMe);
 } else {
