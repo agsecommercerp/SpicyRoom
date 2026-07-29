@@ -1,19 +1,14 @@
 function iniciarAviseMe() {
-    // Evita duplicar se já foi injetado
     if (document.querySelector('#custom-avise-me')) return;
 
-    // Seletor cirúrgico baseado no HTML real da Nuvemshop
     const outOfStockInput = document.querySelector('input.nostock[disabled], input[data-store="product-buy-button"][disabled]');
 
     if (outOfStockInput) {
-        // Encontra o container .col-12 pai do botão
         const colContainer = outOfStockInput.closest('.col-12');
 
         if (colContainer) {
-            // Oculta completamente o botão "Esgotado" original
             outOfStockInput.style.display = 'none';
 
-            // Cria o bloco do formulário customizado
             const formHtml = `
                 <div id="custom-avise-me" style="margin-top: 5px; margin-bottom: 15px; padding: 15px; background: #fdfbfb; border: 1px solid #e0e0e0; border-radius: 6px; font-family: inherit;">
                     <p style="margin-bottom: 8px; font-weight: 600; font-size: 14px; color: #333;">Produto esgotado! Deseja ser avisado quando voltar?</p>
@@ -23,21 +18,46 @@ function iniciarAviseMe() {
                 </div>
             `;
 
-            // Insere o formulário logo acima do botão original
             colContainer.insertAdjacentHTML('beforebegin', formHtml);
 
-            // Ação do botão de envio
             const submitBtn = document.getElementById('avise-submit');
             if (submitBtn) {
                 submitBtn.addEventListener('click', function(e) {
                     e.preventDefault();
                     const emailInput = document.getElementById('avise-email').value;
                     const msgSpan = document.getElementById('avise-msg');
+                    // Pega o nome do produto dinamicamente na página
+                    const productName = document.querySelector('h1, h2.h4, .js-product-name')?.innerText || 'Produto Esgotado';
 
                     if (emailInput && emailInput.includes('@')) {
-                        msgSpan.style.color = '#2d6a4f';
-                        msgSpan.innerText = 'E-mail cadastrado com sucesso! Avisaremos assim que repormos.';
-                        document.getElementById('avise-email').value = '';
+                        submitBtn.disabled = true;
+                        submitBtn.innerText = 'Enviando...';
+
+                        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzUAWUAbYOlFbj764p6tuf69S94mDADZLlwurz7vUambAVpzl7u8g0myikAJmE4JAg/exec';
+
+                        fetch(GOOGLE_SCRIPT_URL, {
+                            method: 'POST',
+                            mode: 'no-cors',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                email: emailInput,
+                                product: productName
+                            })
+                        }).then(() => {
+                            msgSpan.style.color = '#2d6a4f';
+                            msgSpan.innerText = 'E-mail cadastrado com sucesso! Avisaremos assim que repormos.';
+                            document.getElementById('avise-email'].value = '';
+                            submitBtn.disabled = false;
+                            submitBtn.innerText = 'Quero ser avisado';
+                        }).catch(() => {
+                            msgSpan.style.color = '#c9184a';
+                            msgSpan.innerText = 'Ocorreu um erro. Tente novamente.';
+                            submitBtn.disabled = false;
+                            submitBtn.innerText = 'Quero ser avisado';
+                        });
+
                     } else {
                         msgSpan.style.color = '#c9184a';
                         msgSpan.innerText = 'Por favor, insira um e-mail válido.';
@@ -48,7 +68,6 @@ function iniciarAviseMe() {
     }
 }
 
-// Observa mudanças dinâmicas na página (essencial para troca de variações)
 const observer = new MutationObserver(() => {
     iniciarAviseMe();
 });
@@ -58,5 +77,4 @@ observer.observe(document.body, {
     subtree: true
 });
 
-// Executa na carga inicial também
 iniciarAviseMe();
