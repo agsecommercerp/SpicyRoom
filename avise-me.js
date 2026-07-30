@@ -1,4 +1,5 @@
 function iniciarAviseMe() {
+    // Se o nosso formulário já existe na tela, não faz nada
     if (document.querySelector('#custom-avise-me')) return;
 
     const outOfStockInput = document.querySelector('input.nostock[disabled], input[data-store="product-buy-button"][disabled]');
@@ -7,6 +8,7 @@ function iniciarAviseMe() {
         const colContainer = outOfStockInput.closest('.col-12');
 
         if (colContainer) {
+            // Oculta completamente o botão original de esgotado
             outOfStockInput.style.display = 'none';
 
             const formHtml = `
@@ -48,7 +50,8 @@ function iniciarAviseMe() {
                         }).then(() => {
                             msgSpan.style.color = '#2d6a4f';
                             msgSpan.innerText = 'E-mail cadastrado com sucesso! Avisaremos assim que repormos.';
-                            document.getElementById('avise-email'].value = '';
+                            // Correção do fechamento do colchete feita aqui:
+                            document.getElementById('avise-email').value = '';
                             submitBtn.disabled = false;
                             submitBtn.innerText = 'Quero ser avisado';
                         }).catch(() => {
@@ -68,6 +71,10 @@ function iniciarAviseMe() {
     }
 }
 
+// Executa a função imediatamente ao carregar
+iniciarAviseMe();
+
+// Observa o corpo da página para reativar caso o tema recarregue os elementos
 const observer = new MutationObserver(() => {
     iniciarAviseMe();
 });
@@ -76,5 +83,3 @@ observer.observe(document.body, {
     childList: true,
     subtree: true
 });
-
-iniciarAviseMe();
